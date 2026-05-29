@@ -23,12 +23,14 @@ language_selection.click()
 time.sleep(1)
 
 # Set the end time
-end = datetime.now() + timedelta(hours=1)
+end = datetime.now() + timedelta(minutes=5)
 end_time = end.strftime("%Y-%m-%d %H:%M:%S")
 
 # Find the big cookie
 big_cookie = driver.find_element(By.CSS_SELECTOR, "#bigCookie")
 
+# Find the number of cookies
+cookies_per_sec = driver.find_element(By.ID, "cookiesPerSecond")
 
 # Functions
 def click_big_cookie():
@@ -50,12 +52,13 @@ def check_upgrades():
             print(f"Could not find {item_id}. {e}")
 
 
-# Schedule a check every minute
-schedule.every(5).minutes.do(check_upgrades)
+# Schedule a check every 30 seconds
+schedule.every(30).seconds.do(check_upgrades)
 
 # Keep it running until end
 while datetime.now() < end:
     schedule.run_pending()
     click_big_cookie()
 
-print("Done - 60 minutes passed.")
+print(f"Done - 5 minutes passed. Cookies/second: {cookies_per_sec.text}")
+# driver.quit()
