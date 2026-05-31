@@ -23,14 +23,10 @@ language_selection.click()
 time.sleep(1)
 
 # Set the end time
-end = datetime.now() + timedelta(minutes=5)
-end_time = end.strftime("%Y-%m-%d %H:%M:%S")
+end_time = datetime.now() + timedelta(minutes=5)
 
 # Find the big cookie
 big_cookie = driver.find_element(By.CSS_SELECTOR, "#bigCookie")
-
-# Find the number of cookies
-cookies_per_sec = driver.find_element(By.ID, "cookiesPerSecond")
 
 # Functions
 def click_big_cookie():
@@ -40,25 +36,31 @@ def click_big_cookie():
 def check_upgrades():
     print("Checking upgrades...")
     available_upgrades = driver.find_elements(By.CSS_SELECTOR, ".product.unlocked.enabled")
-    item_ids = [item.get_attribute("id") for item in available_upgrades]
-    print(item_ids)
 
-    for item_id in item_ids:
-        try:
-            driver.find_element(By.ID, item_id).click()
-            print(f"{item_id} upgraded")
-            time.sleep(1)
-        except Exception as e:
-            print(f"Could not find {item_id}. {e}")
+    if not available_upgrades:
+        print("No upgrade available")
+        return
+
+    most_expensive = available_upgrades[-1]
+    item_id = most_expensive.get_attribute("id")
+
+    try:
+        most_expensive.click()
+        print(f"{item_id} upgraded")
+    except Exception as e:
+        print(f"Could not find {item_id}. {e}")
 
 
-# Schedule a check every 30 seconds
-schedule.every(30).seconds.do(check_upgrades)
+# Schedule a check every 5 seconds
+schedule.every(5).seconds.do(check_upgrades)
 
 # Keep it running until end
-while datetime.now() < end:
+while datetime.now() < end_time:
     schedule.run_pending()
     click_big_cookie()
 
-print(f"Done - 5 minutes passed. Cookies/second: {cookies_per_sec.text}")
+# Find the number of cookies/second
+cookies_data = driver.find_element(By.ID, "cookies").text.split(" ")
+cookies_per_sec = cookies_data[-1]
+print(f"Done - 5 minutes passed. Cookies/second: {cookies_per_sec}")
 # driver.quit()
